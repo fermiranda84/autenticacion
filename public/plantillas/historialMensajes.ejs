@@ -1,0 +1,57 @@
+<h1 class="text-primary">Centro de mensajes</h1>
+<h3 class="mb-5">(Compresión: <%=mensajes.compresion %>%)</h3>
+
+        <form onsubmit="enviarMensaje()">
+            <div class="mb-3">
+                <label for="email"><b>Correo electrónico</b></label>
+                <input id="email" class="form-control" type="email" name="email">
+                <div class="text-danger" id="emailError"></div>
+            </div>
+            <div class="mb-3">
+                <label for="nombre"><b>Nombre</b></label>
+                <input id="nombre" class="form-control" type="text" name="nombre">
+            </div>
+            <div class="mb-3">
+                <label for="apellido"><b>Apellido</b></label>
+                <input id="apellido" class="form-control" type="text" name="apellido">
+            </div>
+            <div class="mb-3">
+                <label for="edad"><b>Edad</b></label>
+                <input id="edad" class="form-control" type="number" name="edad">
+            </div>
+            <div class="mb-3">
+                <label for="alias"><b>Alias</b></label>
+                <input id="alias" class="form-control" type="text" name="alias">
+            </div>
+            <div class="mb-3">
+                <label for="avatar"><b>Avatar</b></label>
+                <input id="avatar" class="form-control" type="text" name="avatar">
+            </div>
+            <hr>
+
+            
+
+            <div class="mb-3">
+                <label for="mensaje"><b>Mensaje</b></label>
+                <input id="mensaje" class="form-control" type="text" name="mensaje">
+                <button class="btn btn-success mt-3 mb-5">Enviar</button>
+            </div>
+        </form>
+
+<% if(mensajes.mensajes.length > 0){ %> 
+    
+            <% for (const mensaje of mensajes.mensajes) {%> 
+
+                <div>
+                    <span class="text-primary fw-bold me-1"><%=mensaje.author.id %></span>
+                    <span style="color: brown;" class="me-1"><%=mensaje.date %>:</span>
+                    <span class="text-success fst-italic"><%=mensaje.text %></span>
+                    <img src="<%=mensaje.author.avatar %>" class="rounded" width="35px" alt="<%=mensaje.author.nombre %>">
+                </div>
+
+            <% } %> 
+         
+    
+<% } else { %> 
+    <span class="text-secondary">Sin mensajes</span>
+<% } %> 

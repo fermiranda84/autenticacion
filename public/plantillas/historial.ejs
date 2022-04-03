@@ -1,0 +1,43 @@
+<h2 class="text-primary mb-5">Productos Cargados</h2>
+
+<% if(productos !== null){ %> 
+    <div class="container bg-secondary text-white p-3">
+
+        <div class="row m-2 text-uppercase mb-5">
+            <div class="col fw-bold">
+                Nombre
+            </div>
+
+            <div class="col fw-bold">
+                Precio
+            </div>
+
+            <div class="col fw-bold">
+                Foto
+            </div>
+        </div>
+
+    
+            <% for (const producto of productos) {%> 
+            <div class="row m-2 d-flex align-items-center">
+                <div class="col">
+                    <%=producto.nombre %>
+                </div>
+    
+                <div class="col">
+                    <%=producto.precio %>
+                </div>
+    
+                <div class="col">
+                    <img src="<%=producto.foto %>" width="50px"/>
+                </div>
+            </div> 
+            <hr>   
+            <% } %> 
+         
+    </div>
+<% } else { %> 
+    <h3 class="alert alert-warning">No hay productos cargados</h3>
+    <a href="./api/productos-test" class="btn btn-primary">Cargar productos de prueba </a>
+<% } %> 
+
