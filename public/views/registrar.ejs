@@ -12,26 +12,27 @@
     <!-- Formulario de ingreso de productos -->
     <div class="container bg-light p-5 m-5 border border-primary rounded">
 
-        <h1 class="text-primary mb-5">Login de Usuario</h1>
+        <h1 class="text-primary mb-5">Registro de Usuario</h1>
 
-       
-        <form class="form" action="/login" method="post" role="form">
+        <form class="form" action="/registrar" method="post" role="form">
             <div class="mb-3">
-                <label for="username"><b>Ingrese su nombre</b></label>
+                <label for="username"><b>Nombre</b></label>
                 <input id="username" class="form-control" type="text" name="username">
-                <div class="text-danger" id="nombreError"></div>
             </div>
             <div class="mb-3">
-                <label for="password"><b>Ingrese su contraseña</b></label>
+                <label for="password"><b>Contraseña</b></label>
                 <input id="password" class="form-control" type="password" name="password">
-                <div class="text-danger" id="passwordError"></div>
+            </div>
+            <div class="mb-3">
+                <label for="email"><b>Email</b></label>
+                <input id="email" class="form-control" type="email" name="email">
+            </div>
+            <div class="mb-3">
+                <label for="foto"><b>Url foto</b></label>
+                <input id="foto" class="form-control" type="text" name="foto">
             </div>
             <button class="btn btn-success mt-3 mb-5">Enviar</button>
         </form>
-
-        <button class="btn btn-success my-3" onclick="location.href = '/registrar'">Registrarse</button>
-
-        <a href="/auth/facebook" class="btn btn-primary"><span class="fa fa-facebook"></span>Ingresar con Facebook</a>
 
     </div>
 

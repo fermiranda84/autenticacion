@@ -9,12 +9,15 @@ const session = require('express-session');
 const urlConfig = require('./src/utils/config')
 const passport = require('passport')
 const FacebookStrategy = require('passport-facebook').Strategy
+const LocalStrategy = require('passport-local').Strategy
 
 const connectMongo = require('connect-mongo');
 const MongoStore = connectMongo.create({
     mongoUrl: urlConfig.mongodb.url,
     ttl: 60
 })
+
+const usuariosDB = [];
 
 
 const app = express();
@@ -30,7 +33,7 @@ app.set('view engine', 'ejs')
 const FACEBOOK_APP_ID = '656837248942149';
 const FACEBOOK_APP_SECRET = '1251d006f64c444f63641fa7ead96ee7';
 
-
+//Passport estrategia Facebook
 passport.use(new FacebookStrategy({
     clientID: FACEBOOK_APP_ID,
     clientSecret: FACEBOOK_APP_SECRET,
@@ -41,15 +44,41 @@ passport.use(new FacebookStrategy({
     console.log(profile);
     cb(null, profile);
   }
-));
+))
+
+//Passport estrategia local
+passport.use(new LocalStrategy(
+    (username, password, cb)=>{
+        
+        const existeUsuario = usuariosDB.find(usuario => {
+            return usuario.username == username;
+        });
+
+        if (!existeUsuario) {
+            console.log('Usuario no encontrado')
+            return cb(null, false);
+        }
+
+        if(!(existeUsuario.password == password)){
+            console.log('Contrase;a invalida')
+            return cb(null, false);
+        }
+
+        return cb(null, existeUsuario);
+    }
+))
+
+
 
 passport.serializeUser((user, cb) => {
     cb(null, user);
 });
 
 passport.deserializeUser((obj, cb) => {
+    const usuario = usuariosDB.find(usuario => usuario.nombre == obj);
     cb(null, obj);
 });
+
 
 
 app.use(cookieParser());
@@ -90,6 +119,7 @@ app.get('/', (req, res)=>{
     if(req.isAuthenticated()){
         res.redirect('./productos')
     } else {
+        console.log(usuariosDB)
         res.redirect('./login')
     }
 
@@ -99,17 +129,64 @@ app.get('/login', (req, res)=>{
     res.render('login');
 })
 
+app.post('/login', passport.authenticate('local', 
+    {
+        successRedirect: '/productos',
+        failureRedirect: '/error'
+    }
+))
+
+app.get('/error', (req, res)=>{
+    res.render('error');
+})
+
+
+app.get('/registrar', (req, res)=>{
+    res.render('registrar');
+})
+
+app.post('/registrar', (req, res)=>{
+    const {username, password, email, foto } = req.body;
+    
+    const newUsuario = usuariosDB.find(usuario => usuario.nombre == username);
+    if (newUsuario) {
+        res.render('error')
+    } else {
+        usuariosDB.push({username, password, email, foto});
+        console.log(usuariosDB)
+        res.redirect('/login')
+    }
+});
+
+
+
+
 app.get('/productos', (req, res)=>{
     
     if(req.isAuthenticated()){
-        
-        const datosUsuario = {
-            nombre: req.user.displayName,
-            foto: req.user.photos[0].value,
-            email: req.user.emails[0].value,
+        let datosUsuario
+
+        if(req.user.displayName){
+            
+            datosUsuario = {
+                nombre: req.user.displayName,
+                foto: req.user.photos[0].value,
+                email: req.user.emails[0].value,
+            }
+          
+
         }
-        res.render('productos', {datos: datosUsuario});
+        else {
+            datosUsuario = {
+                nombre: req.user.username,
+                foto: req.user.foto,
+                email: req.user.email,
+            }
+        }
+
+        res.render('productos', {datos: datosUsuario})
     }
+    
     else {
         res.redirect('/error')
     }
@@ -155,13 +232,7 @@ io.on('connection', socket => {
 
     })
 
-    socket.on('loginNuevo', data =>{
-       
-       isLoged = data.isLoged
-
-    })
-
-    
+  
 
 })
 
