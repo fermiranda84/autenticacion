@@ -3,7 +3,9 @@ const bodyParser = require('body-parser')
 const {Server: HttpServer} = require('http')
 const {Server: IOServer} = require('socket.io')
 const ProductosMock = require('./src/mocks/producto.mock')
-const objProductosMock = new ProductosMock();
+const objProductosMock = new ProductosMock()
+const UsuarioModel = require('./src/models/userModel')
+const objUsuarioModel = new UsuarioModel()
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const urlConfig = require('./src/utils/config')
@@ -16,8 +18,6 @@ const MongoStore = connectMongo.create({
     mongoUrl: urlConfig.mongodb.url,
     ttl: 60
 })
-
-const usuariosDB = [];
 
 
 const app = express();
@@ -50,21 +50,25 @@ passport.use(new FacebookStrategy({
 passport.use(new LocalStrategy(
     (username, password, cb)=>{
         
-        const existeUsuario = usuariosDB.find(usuario => {
-            return usuario.username == username;
-        });
 
-        if (!existeUsuario) {
-            console.log('Usuario no encontrado')
-            return cb(null, false);
-        }
+        objUsuarioModel.existeUsuario(username)
+            .then((res) => {
 
-        if(!(existeUsuario.password == password)){
-            console.log('Contrase;a invalida')
-            return cb(null, false);
-        }
+                if (!res) {
+                    console.log('Usuario no encontrado')
+                    return cb(null, false);
+                }
+        
+                if(!(res.password == password)){
+                    console.log('Contrase;a invalida')
+                    return cb(null, false);
+                }
+        
+                return cb(null, res);
+            })
 
-        return cb(null, existeUsuario);
+            .catch((err) =>{console.log(err)})
+
     }
 ))
 
@@ -75,7 +79,6 @@ passport.serializeUser((user, cb) => {
 });
 
 passport.deserializeUser((obj, cb) => {
-    const usuario = usuariosDB.find(usuario => usuario.nombre == obj);
     cb(null, obj);
 });
 
@@ -119,7 +122,6 @@ app.get('/', (req, res)=>{
     if(req.isAuthenticated()){
         res.redirect('./productos')
     } else {
-        console.log(usuariosDB)
         res.redirect('./login')
     }
 
@@ -148,14 +150,20 @@ app.get('/registrar', (req, res)=>{
 app.post('/registrar', (req, res)=>{
     const {username, password, email, foto } = req.body;
     
-    const newUsuario = usuariosDB.find(usuario => usuario.nombre == username);
-    if (newUsuario) {
-        res.render('error')
-    } else {
-        usuariosDB.push({username, password, email, foto});
-        console.log(usuariosDB)
-        res.redirect('/login')
-    }
+    objUsuarioModel.existeUsuario(username)
+        .then((respuesta) =>{
+
+            if (respuesta) {
+                res.render('error')
+            } else {
+                const data = {username, password, email, foto}
+                objUsuarioModel.registrarUsuario(data)
+                res.redirect('/login')
+            }
+
+        })
+
+        .catch((err) =>{console.log(err)})
 });
 
 

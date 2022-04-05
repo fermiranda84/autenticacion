@@ -14,6 +14,7 @@ class Contenedor {
 
     constructor(nombreColeccion, esquema){
         this.mensajes = mongoose.model(nombreColeccion, esquema)
+        this.usuario = mongoose.model(nombreColeccion, esquema)
     }
 
     
@@ -79,6 +80,41 @@ class Contenedor {
             console.error(error)
         }
     }
+
+    async registrarUsuario (data) {
+
+        try {
+            const usuario = {
+                
+                username: data.username,
+                password: data.password,
+                email: data.email,
+                foto: data.foto
+            }
+            const obj = new this.usuario(usuario)
+            const save = await obj.save()
+            return save
+        
+        } catch (error) {
+            console.error(error)
+        }
+
+
+    }
+
+    async existeUsuario(data) {
+
+        try {
+
+            let usuarioMongo = await this.usuario.findOne({username : data})
+            return usuarioMongo
+        }
+
+        catch(err) {console.log(err)}
+        
+
+    }
+
 
 }
 
